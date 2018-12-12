@@ -78,7 +78,7 @@ namespace Pakowanie_LED_MST
             }
         }
 
-        private static Dictionary<string,string> CheckViResult(string[] serialNo)
+        public static Dictionary<string,string> CheckViResult(string[] serialNo)
         {
             Dictionary<string, string> result = SqlOperations.CheckViResultsForPcbs(serialNo);
 
@@ -91,7 +91,7 @@ namespace Pakowanie_LED_MST
             return result;
         }
 
-        private static Dictionary<string, string> CheckTestResult(string[] serialNo)
+        public static Dictionary<string, string> CheckTestResult(string[] serialNo)
         {
             Dictionary<string, string> result = SqlOperations.CheckTestResultsForPcbs(serialNo);
             

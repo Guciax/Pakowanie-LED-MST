@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,12 @@ namespace Pakowanie_LED_MST
             AppSettingsOperations.CheckAppSettingsKeys();
             optionCheckTest = AppSettingsOperations.GetSettings("CheckLedTest")=="1";
             optionCheckVi = AppSettingsOperations.GetSettings("CheckViTest")=="1";
+            DgvTools.ShowHideColumns(optionCheckTest, optionCheckVi, dgvCurrentBox);
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            this.Text +=" ver."+ version;
+            
         }
 
         private void textBoxAddPcb_Enter(object sender, EventArgs e)
@@ -97,10 +104,26 @@ namespace Pakowanie_LED_MST
 
         private void CountPanels()
         {
-            labelAllQty.Text = currentBox.TotalQty.ToString();
-            labelGoodQty.Text = currentBox.GoodQty.ToString();
-            labelNgCount.Text = currentBox.NgQty.ToString();
-            labelUnknownCount.Text = currentBox.UnknownTestQty.ToString();
+            int okPcb = 0, ngPcb = 0, unknownPcb = 0;
+           
+            foreach (DataGridViewRow row in dgvCurrentBox.Rows)
+            {
+                if (row.Cells[0].Style.BackColor == Color.Lime)
+                {
+                    okPcb++;
+                    continue;
+                }
+                if (row.Cells[0].Style.BackColor == Color.Red)
+                {
+                    ngPcb++;
+                    continue;
+                }
+                unknownPcb++;
+            }
+            labelAllQty.Text = (okPcb + ngPcb + unknownPcb).ToString();
+            labelGoodQty.Text = okPcb.ToString();
+            labelNgCount.Text = ngPcb.ToString();
+            labelUnknownCount.Text = unknownPcb.ToString();
             if (labelNgCount.Text != "0")
             {
                 timerFlashNg.Enabled = true;
@@ -122,7 +145,7 @@ namespace Pakowanie_LED_MST
             {
                 if (currentBox.NewResultsAdded)
                 {
-                    DgvTools.CheckTests(dgvCurrentBox, ref currentBox, optionCheckTest, optionCheckVi);
+                    DgvTools.CheckTests(dgvCurrentBox, ref currentBox);
                 }
                 CountPanels();
             }
@@ -146,8 +169,6 @@ namespace Pakowanie_LED_MST
         {
             this.ActiveControl = textBoxAddPcb;
         }
-
-
 
         private void dgvCurrentBox_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
@@ -189,6 +210,7 @@ namespace Pakowanie_LED_MST
                     optionCheckTest = optionForm.outputOptionTest;
                     optionCheckVi = optionForm.outputOptionVi;
                     SaveSettings();
+                    DgvTools.ShowHideColumns(optionCheckTest, optionCheckVi, dgvCurrentBox);
                 }
             }
         }

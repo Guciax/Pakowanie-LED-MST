@@ -68,6 +68,12 @@
     <Compile Include="Forms\Options.Designer.cs">
       <DependentUpon>Options.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ShowPcbDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ShowPcbDetails.Designer.cs">
+      <DependentUpon>ShowPcbDetails.cs</DependentUpon>
+    </Compile>
     <Compile Include="GridOperations.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,6 +87,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Options.resx">
       <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ShowPcbDetails.resx">
+      <DependentUpon>ShowPcbDetails.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

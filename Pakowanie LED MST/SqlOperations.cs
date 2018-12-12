@@ -19,7 +19,7 @@ namespace Pakowanie_LED_MST
 
             SqlCommand command = new SqlCommand();
             command.Connection = conn;
-            command.CommandText = @"SELECT DISTINCT serial_no,result,inspection_time FROM tb_tester_measurements WHERE ";
+            command.CommandText = @"SELECT DISTINCT serial_no,result,inspection_time FROM tb_tester_measurements WHERE (";
 
             for (int i = 0; i < pcbs.Length; i++)
             {
@@ -30,7 +30,7 @@ namespace Pakowanie_LED_MST
                 command.CommandText += "serial_no=" + "@serial" + i.ToString() + "";
                 command.Parameters.AddWithValue("@serial" + i.ToString(), pcbs[i]);
             }
-            command.CommandText += " ORDER BY inspection_time DESC;";
+            command.CommandText += ") AND tester_id<>0 ORDER BY inspection_time DESC;";
 
             SqlDataAdapter adapter = new SqlDataAdapter(command);
 

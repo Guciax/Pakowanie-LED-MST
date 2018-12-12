@@ -48,18 +48,18 @@
             this.labelGoodQty = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.dgvCurrentBox = new System.Windows.Forms.DataGridView();
-            this.timerCheckDgvForTestResults = new System.Windows.Forms.Timer(this.components);
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.timerTestResultsToGrid = new System.Windows.Forms.Timer(this.components);
-            this.timerFlashNg = new System.Windows.Forms.Timer(this.components);
             this.rowIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PCB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TestResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ViResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column4 = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.button1 = new System.Windows.Forms.Button();
+            this.timerCheckDgvForTestResults = new System.Windows.Forms.Timer(this.components);
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.timerTestResultsToGrid = new System.Windows.Forms.Timer(this.components);
+            this.timerFlashNg = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -290,9 +290,24 @@
             this.label4.TabIndex = 6;
             this.label4.Text = "OK:";
             // 
+            // button1
+            // 
+            this.button1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.button1.Location = new System.Drawing.Point(81, 1);
+            this.button1.Margin = new System.Windows.Forms.Padding(1);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(78, 92);
+            this.button1.TabIndex = 14;
+            this.button1.Text = "Opcje";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // dgvCurrentBox
             // 
             this.dgvCurrentBox.AllowUserToAddRows = false;
+            this.dgvCurrentBox.AllowUserToDeleteRows = false;
+            this.dgvCurrentBox.AllowUserToResizeColumns = false;
+            this.dgvCurrentBox.AllowUserToResizeRows = false;
             this.dgvCurrentBox.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvCurrentBox.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.rowIndex,
@@ -304,36 +319,18 @@
             this.dgvCurrentBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCurrentBox.Location = new System.Drawing.Point(3, 103);
             this.dgvCurrentBox.Name = "dgvCurrentBox";
+            this.dgvCurrentBox.ReadOnly = true;
             this.dgvCurrentBox.RowHeadersVisible = false;
             this.dgvCurrentBox.Size = new System.Drawing.Size(1124, 502);
             this.dgvCurrentBox.TabIndex = 1;
             this.dgvCurrentBox.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCurrentBox_CellContentClick);
             this.dgvCurrentBox.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCurrentBox_CellValueChanged);
             // 
-            // timerCheckDgvForTestResults
-            // 
-            this.timerCheckDgvForTestResults.Enabled = true;
-            this.timerCheckDgvForTestResults.Interval = 10000;
-            this.timerCheckDgvForTestResults.Tick += new System.EventHandler(this.timerCheckDgvForTestResults_Tick);
-            // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            // 
-            // timerTestResultsToGrid
-            // 
-            this.timerTestResultsToGrid.Enabled = true;
-            this.timerTestResultsToGrid.Interval = 500;
-            this.timerTestResultsToGrid.Tick += new System.EventHandler(this.timerTestResultsToGrid_Tick);
-            // 
-            // timerFlashNg
-            // 
-            this.timerFlashNg.Interval = 500;
-            // 
             // rowIndex
             // 
             this.rowIndex.HeaderText = "#";
             this.rowIndex.Name = "rowIndex";
+            this.rowIndex.ReadOnly = true;
             this.rowIndex.Width = 30;
             // 
             // Column1
@@ -369,16 +366,25 @@
             this.Column4.ReadOnly = true;
             this.Column4.Width = 35;
             // 
-            // button1
+            // timerCheckDgvForTestResults
             // 
-            this.button1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button1.Location = new System.Drawing.Point(83, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(74, 88);
-            this.button1.TabIndex = 14;
-            this.button1.Text = "Opcje";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.timerCheckDgvForTestResults.Enabled = true;
+            this.timerCheckDgvForTestResults.Interval = 10000;
+            this.timerCheckDgvForTestResults.Tick += new System.EventHandler(this.timerCheckDgvForTestResults_Tick);
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            // 
+            // timerTestResultsToGrid
+            // 
+            this.timerTestResultsToGrid.Enabled = true;
+            this.timerTestResultsToGrid.Interval = 500;
+            this.timerTestResultsToGrid.Tick += new System.EventHandler(this.timerTestResultsToGrid_Tick);
+            // 
+            // timerFlashNg
+            // 
+            this.timerFlashNg.Interval = 500;
             // 
             // Form1
             // 

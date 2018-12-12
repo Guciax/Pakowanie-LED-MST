@@ -1,6 +1,7 @@
 ﻿using Pakowanie_LED_MST.Data_structure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -9,16 +10,35 @@ namespace Pakowanie_LED_MST
 {
     class DgvTools
     {
-        public static void CheckTests(DataGridView grid, ref CurrentBox currentBox, bool checkTest, bool checkVi)
+        public static void ShowHideColumns(bool testOption, bool viOption, DataGridView grid)
         {
+            if (testOption)
+            {
+                grid.Columns["TestResult"].Visible = true;
+            }
+            else
+            {
+                grid.Columns["TestResult"].Visible = false;
+            }
 
+            if (viOption)
+            {
+                grid.Columns["ViResult"].Visible = true;
+            }
+            else
+            {
+                grid.Columns["ViResult"].Visible = false;
+            }
+        }
+
+        public static void CheckTests(DataGridView grid, ref CurrentBox currentBox)
+        {
             foreach (var pcb in currentBox.LedsInBox)
             {
                 if (pcb.Value.AddMeToGrid)
                 {
                     grid.Rows.Insert(0,grid.Rows.Count+1,pcb.Value.Date, pcb.Value.Serial);
                     pcb.Value.AddMeToGrid = false;
-
                 }
             }
 
@@ -26,7 +46,7 @@ namespace Pakowanie_LED_MST
             {
                 if (row.Cells["PCB"].Value == null) continue;
                 string serial = row.Cells["PCB"].Value.ToString();
-                if (checkTest)
+                if (grid.Columns["TestResult"].Visible)
                 {
                     row.Cells["TestResult"].Value = currentBox.LedsInBox[serial].TestResult;
                 }
@@ -34,7 +54,7 @@ namespace Pakowanie_LED_MST
                 {
                     row.Cells["TestResult"].Value = "Wyłączone";
                 }
-                if (checkVi)
+                if (grid.Columns["ViResult"].Visible)
                 {
                     row.Cells["ViResult"].Value = currentBox.LedsInBox[serial].ViResult;
                 }
@@ -46,6 +66,14 @@ namespace Pakowanie_LED_MST
             currentBox.NewResultsAdded = false;
         }
 
+        private static int SetCellResultStatus(string value)
+        {
+            if (value == "Sprawdzam...") return 0;
+            if (value == "OK") return 1;
+            if (value == "BrakDanych") return 2;
+            return 3;
+        }
+
         public static void ColorGridRows(DataGridView grid)
         {
             foreach (DataGridViewRow row in grid.Rows)
@@ -53,26 +81,59 @@ namespace Pakowanie_LED_MST
                 if (row.Cells["TestResult"].Value == null) continue;
                 if (row.Cells["ViResult"].Value == null) continue;
 
-                System.Drawing.Color rowBackColor = System.Drawing.Color.Lime;
-                System.Drawing.Color rowForeColor = System.Drawing.Color.Black;
+                //columns status:   0-don't change
+                //                  1-OK lime
+                //                  2-unknown yellow
+                //                  3-NG red
 
-                if (row.Cells["TestResult"].Value.ToString() == "NG" || row.Cells["ViResult"].Value.ToString() == "NG")
+                int testStatus = 0;
+                if (grid.Columns["TestResult"].Visible)
                 {
-                    rowBackColor = System.Drawing.Color.Red;
-                    rowForeColor = System.Drawing.Color.White;
+                    testStatus=SetCellResultStatus(row.Cells["TestResult"].Value.ToString());
                 }
-                else if (row.Cells["TestResult"].Value.ToString() == "BrakDanych" || row.Cells["ViResult"].Value.ToString() == "BrakDanych")
+                int viStatus = 0;
+                if (grid.Columns["ViResult"].Visible)
                 {
-                    rowBackColor = System.Drawing.Color.Yellow;
+                    viStatus = SetCellResultStatus(row.Cells["ViResult"].Value.ToString());
                 }
-                else if (row.Cells["TestResult"].Value.ToString() == "Sprawdzam..." || row.Cells["ViResult"].Value.ToString() == "Sprawdzam...")
+
+                //Debug.WriteLine("test: " + row.Cells["TestResult"].Value.ToString() + " - " + testStatus);
+               // Debug.WriteLine("vi  : " + row.Cells["ViResult"].Value.ToString() + " - " + testStatus);
+
+                int rowStatus = Math.Max(testStatus, viStatus);
+
+                if (rowStatus > 0)
                 {
-                    rowBackColor = System.Drawing.Color.Yellow;
-                }
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    cell.Style.BackColor = rowBackColor;
-                    cell.Style.ForeColor = rowForeColor;
+                    System.Drawing.Color rowBackColor = System.Drawing.Color.White;
+                    System.Drawing.Color rowForeColor = System.Drawing.Color.Black;
+
+                    switch (rowStatus)
+                    {
+                        case 1:
+                            {
+                                rowBackColor = System.Drawing.Color.Lime;
+                                rowForeColor = System.Drawing.Color.Black;
+                                break;
+                            }
+                        case 2:
+                            {
+                                rowBackColor = System.Drawing.Color.LightYellow;
+                                rowForeColor = System.Drawing.Color.Black;
+                                break;
+                            }
+                        case 3:
+                            {
+                                rowBackColor = System.Drawing.Color.Red;
+                                rowForeColor = System.Drawing.Color.White;
+                                break;
+                            }
+                    }
+
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        cell.Style.BackColor = rowBackColor;
+                        cell.Style.ForeColor = rowForeColor;
+                    }
                 }
             }
         }
