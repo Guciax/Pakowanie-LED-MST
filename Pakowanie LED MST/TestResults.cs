@@ -23,7 +23,7 @@ namespace Pakowanie_LED_MST
 
                 foreach (var pcb in currentBox.LedsInBox)
                 {
-                    if (pcb.Value.TestResult == "BrakDanych" )
+                    if (pcb.Value.TestResult == "BrakDanych" || pcb.Value.TestResult == "NG")
                     {
                         if (checkTest)
                         {
@@ -31,13 +31,14 @@ namespace Pakowanie_LED_MST
                         }
                     }
 
-                    if ( pcb.Value.ViResult == "BrakDanych")
+                    if ( pcb.Value.ViResult == "BrakDanych" || pcb.Value.ViResult == "NG")
                     {
                         if (checkVi)
                         {
                             pcbWithoutVi.Add(pcb.Value.Serial);
                         }
                     }
+
                 }
 
                 if (pcbWithoutTest.Count > 0)
@@ -81,6 +82,8 @@ namespace Pakowanie_LED_MST
         public static Dictionary<string,string> CheckViResult(string[] serialNo)
         {
             Dictionary<string, string> result = SqlOperations.CheckViResultsForPcbs(serialNo);
+
+
 
             foreach (var pcb in serialNo)
             {

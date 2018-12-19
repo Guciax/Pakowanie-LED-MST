@@ -39,6 +39,7 @@
             this.buttonNewBox = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
             this.labelCurrentBoxId = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.labelAllQty = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
@@ -60,6 +61,7 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.timerTestResultsToGrid = new System.Windows.Forms.Timer(this.components);
             this.timerFlashNg = new System.Windows.Forms.Timer(this.components);
+            this.timerBlinkThePanel = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -98,9 +100,9 @@
             this.tableLayoutPanel3.ColumnCount = 5;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel3.Controls.Add(this.panel4, 3, 0);
             this.tableLayoutPanel3.Controls.Add(this.buttonNewBox, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.panel3, 2, 0);
@@ -112,21 +114,20 @@
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 94F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(1124, 94);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // panel4
             // 
-            this.panel4.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel4.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panel4.Controls.Add(this.button3);
             this.panel4.Controls.Add(this.label1);
             this.panel4.Controls.Add(this.textBoxAddPcb);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(546, 1);
+            this.panel4.Location = new System.Drawing.Point(643, 1);
             this.panel4.Margin = new System.Windows.Forms.Padding(1);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(287, 92);
+            this.panel4.Size = new System.Drawing.Size(239, 92);
             this.panel4.TabIndex = 13;
             // 
             // button3
@@ -143,7 +144,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(6, 4);
+            this.label1.Location = new System.Drawing.Point(6, 6);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 17);
             this.label1.TabIndex = 10;
@@ -152,9 +153,9 @@
             // textBoxAddPcb
             // 
             this.textBoxAddPcb.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.textBoxAddPcb.Location = new System.Drawing.Point(6, 22);
+            this.textBoxAddPcb.Location = new System.Drawing.Point(6, 24);
             this.textBoxAddPcb.Name = "textBoxAddPcb";
-            this.textBoxAddPcb.Size = new System.Drawing.Size(278, 23);
+            this.textBoxAddPcb.Size = new System.Drawing.Size(230, 23);
             this.textBoxAddPcb.TabIndex = 9;
             this.textBoxAddPcb.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxAddPcb_KeyDown);
             this.textBoxAddPcb.Leave += new System.EventHandler(this.textBoxAddPcb_Leave_1);
@@ -173,13 +174,14 @@
             // 
             // panel3
             // 
-            this.panel3.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel3.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panel3.Controls.Add(this.labelCurrentBoxId);
+            this.panel3.Controls.Add(this.label3);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(161, 1);
             this.panel3.Margin = new System.Windows.Forms.Padding(1);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(383, 92);
+            this.panel3.Size = new System.Drawing.Size(480, 92);
             this.panel3.TabIndex = 12;
             // 
             // labelCurrentBoxId
@@ -192,9 +194,19 @@
             this.labelCurrentBoxId.TabIndex = 5;
             this.labelCurrentBoxId.Text = "Aktualne opakowanie ID:\r\n";
             // 
+            // label3
+            // 
+            this.label3.Dock = System.Windows.Forms.DockStyle.Right;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 60F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label3.Location = new System.Drawing.Point(262, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(218, 92);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "0";
+            // 
             // panel2
             // 
-            this.panel2.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel2.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panel2.Controls.Add(this.labelAllQty);
             this.panel2.Controls.Add(this.label7);
             this.panel2.Controls.Add(this.labelUnknownCount);
@@ -204,10 +216,10 @@
             this.panel2.Controls.Add(this.label5);
             this.panel2.Controls.Add(this.label4);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(835, 1);
+            this.panel2.Location = new System.Drawing.Point(884, 1);
             this.panel2.Margin = new System.Windows.Forms.Padding(1);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(288, 92);
+            this.panel2.Size = new System.Drawing.Size(239, 92);
             this.panel2.TabIndex = 11;
             // 
             // labelAllQty
@@ -219,6 +231,7 @@
             this.labelAllQty.Size = new System.Drawing.Size(124, 29);
             this.labelAllQty.TabIndex = 13;
             this.labelAllQty.Text = "Ilość PCB:";
+            this.labelAllQty.TextChanged += new System.EventHandler(this.labelAllQty_TextChanged);
             // 
             // label7
             // 
@@ -386,6 +399,11 @@
             // 
             this.timerFlashNg.Interval = 500;
             // 
+            // timerBlinkThePanel
+            // 
+            this.timerBlinkThePanel.Interval = 300;
+            this.timerBlinkThePanel.Tick += new System.EventHandler(this.timerBlinkThePanel_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -442,6 +460,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ViResult;
         private System.Windows.Forms.DataGridViewButtonColumn Column4;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Timer timerBlinkThePanel;
     }
 }
 

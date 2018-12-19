@@ -40,6 +40,7 @@
             this.textBoxNewBoxId.Name = "textBoxNewBoxId";
             this.textBoxNewBoxId.Size = new System.Drawing.Size(297, 29);
             this.textBoxNewBoxId.TabIndex = 0;
+            this.textBoxNewBoxId.TextChanged += new System.EventHandler(this.textBoxNewBoxId_TextChanged);
             this.textBoxNewBoxId.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxNewBoxId_KeyDown);
             // 
             // label1

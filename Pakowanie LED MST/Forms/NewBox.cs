@@ -30,5 +30,10 @@ namespace Pakowanie_LED_MST.Forms
                 this.Close();
             }
         }
+
+        private void textBoxNewBoxId_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

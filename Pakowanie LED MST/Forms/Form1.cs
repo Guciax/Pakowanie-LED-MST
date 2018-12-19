@@ -86,12 +86,15 @@ namespace Pakowanie_LED_MST
         {
             if (e.KeyCode == Keys.Return)
             {
-                string serial = textBoxAddPcb.Text.Trim();
+                string serial = ShortenPcbSerial(textBoxAddPcb.Text.Trim());
+
                 if (!currentBox.LedsInBox.ContainsKey(serial))
                 {
                     CurrentBoxOperation.AddPcbToBox(serial, ref currentBox);
                     FilesOperations.SaveBoxFile(currentBox);
                     DgvTools.AutoColumnSize(dgvCurrentBox, DataGridViewAutoSizeColumnMode.AllCells);
+                    lastRowColor = dgvCurrentBox.Rows[0].Cells[0].Style.BackColor;
+                    timerBlinkThePanel.Enabled = true;
                 }
                 else
                 {
@@ -100,6 +103,44 @@ namespace Pakowanie_LED_MST
                 textBoxAddPcb.Text = "";
                 CountPanels();
             }
+        }
+
+        Color lastRowColor;
+        Stopwatch blinkStoper = new Stopwatch();
+        private void timerBlinkThePanel_Tick(object sender, EventArgs e)
+        {
+            if (!blinkStoper.IsRunning)
+            {
+                blinkStoper.Start();
+            }
+
+            if (blinkStoper.ElapsedMilliseconds>2000)
+            {
+                timerBlinkThePanel.Enabled = false;
+                blinkStoper.Stop();
+                blinkStoper.Reset();
+                panel3.BackColor = Color.LightSteelBlue;
+            }
+            else
+            {
+                if (panel3.BackColor == Color.LightSteelBlue)
+                {
+                    panel3.BackColor = lastRowColor;
+                }
+                else
+                {
+                    panel3.BackColor = Color.LightSteelBlue;
+                }
+            }
+        }
+
+        internal static string ShortenPcbSerial(string inputId)
+        {
+            if (!inputId.Contains("_")) return inputId;
+            if (inputId.Length <= 50) return inputId;
+
+            string[] split = inputId.Split('_');
+            return $"{split[split.Length - 2]}_{split[split.Length - 1]}";
         }
 
         private void CountPanels()
@@ -121,6 +162,7 @@ namespace Pakowanie_LED_MST
                 unknownPcb++;
             }
             labelAllQty.Text = (okPcb + ngPcb + unknownPcb).ToString();
+            label3.Text = labelAllQty.Text;
             labelGoodQty.Text = okPcb.ToString();
             labelNgCount.Text = ngPcb.ToString();
             labelUnknownCount.Text = unknownPcb.ToString();
@@ -221,5 +263,11 @@ namespace Pakowanie_LED_MST
             AppSettingsOperations.AddOrUpdateAppSettings("CheckViTest", optionCheckVi ? "1" : "0");
         }
 
+        private void labelAllQty_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        
     }
 }
