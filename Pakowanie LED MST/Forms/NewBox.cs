@@ -27,6 +27,7 @@ namespace Pakowanie_LED_MST.Forms
             if (e.KeyCode == Keys.Return)
             {
                 boxId = textBoxNewBoxId.Text;
+                this.DialogResult = DialogResult.OK;
                 this.Close();
             }
         }

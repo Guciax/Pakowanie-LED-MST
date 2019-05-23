@@ -31,39 +31,19 @@ namespace Pakowanie_LED_MST
             }
         }
 
-        public static void CheckTests(DataGridView grid, ref CurrentBox currentBox)
+        public static void UpdateTestsToGrid(DataGridView grid, ref CurrentBox currentBox)
         {
-            foreach (var pcb in currentBox.LedsInBox)
-            {
-                if (pcb.Value.AddMeToGrid)
-                {
-                    grid.Rows.Insert(0,grid.Rows.Count+1,pcb.Value.Date, pcb.Value.Serial);
-                    pcb.Value.AddMeToGrid = false;
-                }
-            }
-
             foreach (DataGridViewRow row in grid.Rows)
             {
                 if (row.Cells["PCB"].Value == null) continue;
                 string serial = row.Cells["PCB"].Value.ToString();
-                if (grid.Columns["TestResult"].Visible)
-                {
-                    row.Cells["TestResult"].Value = currentBox.LedsInBox[serial].TestResult;
-                }
-                else
-                {
-                    row.Cells["TestResult"].Value = "Wyłączone";
-                }
-                if (grid.Columns["ViResult"].Visible)
-                {
-                    row.Cells["ViResult"].Value = currentBox.LedsInBox[serial].ViResult;
-                }
-                else
-                {
-                    row.Cells["ViResult"].Value = "Wyłączone";
-                }
+                if (!currentBox.LedsInBox[serial].UpdateMe) continue;
+
+                row.Cells["TestResult"].Value = currentBox.LedsInBox[serial].TestResult;
+                row.Cells["ViResult"].Value = CurrentBoxOperation.GetFinalViInspectionResult(currentBox.LedsInBox[serial]);
+                currentBox.LedsInBox[serial].UpdateMe = false;
             }
-            currentBox.NewResultsAdded = false;
+
         }
 
         private static int SetCellResultStatus(string value)
@@ -74,94 +54,108 @@ namespace Pakowanie_LED_MST
             return 3;
         }
 
+        public static string[] CheckMixed12NC(DataGridView grid)
+        {
+            List<string> nc12InBox = new List<string>();
+            if (grid.Rows.Count > 0)
+            {
+                string firstPcbSerial = grid.Rows[grid.Rows.Count - 1].Cells["PCB"].Value.ToString();
+                string firstPcb12NC = "";
+
+                if (firstPcbSerial.Split('_').Length == 3)
+                {
+                    firstPcb12NC = firstPcbSerial.Split('_')[0].Replace(" ","");
+
+                    nc12InBox.Add(firstPcb12NC);
+                    foreach (DataGridViewRow row in grid.Rows)
+                    {
+                        string[] serialNo = row.Cells["PCB"].Value.ToString().Split('_');
+                        if (serialNo.Length != 3) continue;
+                        string nc12 = serialNo[0].Replace(" ", "");
+                        if (nc12InBox.Contains(nc12)) continue;
+                        nc12InBox.Add(nc12);
+                        foreach (DataGridViewCell cell in row.Cells)
+                        {
+                            cell.Style.BackColor = System.Drawing.Color.Orange;
+                            cell.Style.ForeColor = System.Drawing.Color.White;
+                        }
+                    }
+                }
+            }
+            return nc12InBox.ToArray();
+        }
+
         public static void ColorGridRows(DataGridView grid)
         {
-            foreach (DataGridViewRow row in grid.Rows)
+            if (grid.Rows.Count > 0)
             {
-                if (row.Cells["TestResult"].Value == null) continue;
-                if (row.Cells["ViResult"].Value == null) continue;
-
-                //columns status:   0-don't change
-                //                  1-OK lime
-                //                  2-unknown yellow
-                //                  3-NG red
-
-                int testStatus = 0;
-                if (grid.Columns["TestResult"].Visible)
+                foreach (DataGridViewRow row in grid.Rows)
                 {
-                    testStatus=SetCellResultStatus(row.Cells["TestResult"].Value.ToString());
-                }
-                int viStatus = 0;
-                if (grid.Columns["ViResult"].Visible)
-                {
+                    
+                    if (row.Cells["TestResult"].Value == null) continue;
+                    if (row.Cells["ViResult"].Value == null) continue;
+                    
+                    //columns status:   0-don't change
+                    //                  1-OK lime
+                    //                  2-unknown yellow
+                    //                  3-NG red
+
+                    int testStatus = 0;
+                    testStatus = SetCellResultStatus(row.Cells["TestResult"].Value.ToString());
+
+                    int viStatus = 0;
                     viStatus = SetCellResultStatus(row.Cells["ViResult"].Value.ToString());
-                }
 
-                //Debug.WriteLine("test: " + row.Cells["TestResult"].Value.ToString() + " - " + testStatus);
-               // Debug.WriteLine("vi  : " + row.Cells["ViResult"].Value.ToString() + " - " + testStatus);
 
-                int rowStatus = Math.Max(testStatus, viStatus);
+                    //Debug.WriteLine("test: " + row.Cells["TestResult"].Value.ToString() + " - " + testStatus);
+                    // Debug.WriteLine("vi  : " + row.Cells["ViResult"].Value.ToString() + " - " + testStatus);
 
-                if (rowStatus > 0)
-                {
-                    System.Drawing.Color rowBackColor = System.Drawing.Color.White;
-                    System.Drawing.Color rowForeColor = System.Drawing.Color.Black;
+                    int rowStatus = Math.Max(testStatus, viStatus);
 
-                    switch (rowStatus)
+                    if (rowStatus > 0)
                     {
-                        case 1:
-                            {
-                                rowBackColor = System.Drawing.Color.Lime;
-                                rowForeColor = System.Drawing.Color.Black;
-                                break;
-                            }
-                        case 2:
-                            {
-                                rowBackColor = System.Drawing.Color.LightYellow;
-                                rowForeColor = System.Drawing.Color.Black;
-                                break;
-                            }
-                        case 3:
-                            {
-                                rowBackColor = System.Drawing.Color.Red;
-                                rowForeColor = System.Drawing.Color.White;
-                                break;
-                            }
-                    }
+                        System.Drawing.Color rowBackColor = System.Drawing.Color.White;
+                        System.Drawing.Color rowForeColor = System.Drawing.Color.Black;
 
-                    foreach (DataGridViewCell cell in row.Cells)
-                    {
-                        cell.Style.BackColor = rowBackColor;
-                        cell.Style.ForeColor = rowForeColor;
+                        switch (rowStatus)
+                        {
+                            case 1:
+                                {
+                                    rowBackColor = System.Drawing.Color.Lime;
+                                    rowForeColor = System.Drawing.Color.Black;
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    rowBackColor = System.Drawing.Color.LightYellow;
+                                    rowForeColor = System.Drawing.Color.Black;
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    rowBackColor = System.Drawing.Color.Red;
+                                    rowForeColor = System.Drawing.Color.White;
+                                    break;
+                                }
+                        }
+
+                        foreach (DataGridViewCell cell in row.Cells)
+                        {
+                            cell.Style.BackColor = rowBackColor;
+                            cell.Style.ForeColor = rowForeColor;
+                        }
                     }
                 }
             }
         }
 
-        public static bool DeletePcb(string serial, ref CurrentBox currentBox, DataGridView grid)
+        public static void DeletePcb(string serial, ref CurrentBox currentBox, DataGridView grid, int rowIndex)
         {
-            int rowIndex = -1;
-            if (currentBox.LedsInBox.ContainsKey(serial))
+            if (SqlOperations.DeletePcbFromBoxSqlTable(serial))
             {
+                grid.Rows.RemoveAt(rowIndex);
                 currentBox.LedsInBox.Remove(serial);
             }
-            else return false;
-
-            foreach (DataGridViewRow row in grid.Rows)
-            {
-                if (row.Cells["PCB"].Value!=null)
-                {
-                    if (row.Cells["PCB"].Value.ToString()==serial)
-                    {
-                        rowIndex = row.Index;
-                    }
-                }
-            }
-            if (rowIndex < 0) return false;
-
-            grid.Rows.RemoveAt(rowIndex);
-            FilesOperations.SaveBoxFile(currentBox);
-            return true;
         }
 
         public static void AutoColumnSize(DataGridView grid, DataGridViewAutoSizeColumnMode adjustMode)

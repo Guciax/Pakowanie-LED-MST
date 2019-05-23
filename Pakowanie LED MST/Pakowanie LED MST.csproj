@@ -48,6 +48,7 @@
     <Compile Include="CurrentBoxOperation.cs" />
     <Compile Include="Data structure\CurrentBox.cs" />
     <Compile Include="Data structure\LedsInCurrentBoxStruct.cs" />
+    <Compile Include="Data structure\ReworkInfo.cs" />
     <Compile Include="DgvTools.cs" />
     <Compile Include="FilesOperations.cs" />
     <Compile Include="Forms\Form1.cs">

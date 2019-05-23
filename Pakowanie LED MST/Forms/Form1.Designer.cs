@@ -38,6 +38,7 @@
             this.textBoxAddPcb = new System.Windows.Forms.TextBox();
             this.buttonNewBox = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.buttonDebug = new System.Windows.Forms.Button();
             this.labelCurrentBoxId = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -56,12 +57,14 @@
             this.PCB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TestResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ViResult = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.ColumnDelete = new System.Windows.Forms.DataGridViewButtonColumn();
             this.timerCheckDgvForTestResults = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.timerTestResultsToGrid = new System.Windows.Forms.Timer(this.components);
             this.timerFlashNg = new System.Windows.Forms.Timer(this.components);
             this.timerBlinkThePanel = new System.Windows.Forms.Timer(this.components);
+            this.panelMixed12NcWarning = new System.Windows.Forms.Panel();
+            this.label = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -69,6 +72,7 @@
             this.panel3.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCurrentBox)).BeginInit();
+            this.panelMixed12NcWarning.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -175,6 +179,8 @@
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.panel3.Controls.Add(this.panelMixed12NcWarning);
+            this.panel3.Controls.Add(this.buttonDebug);
             this.panel3.Controls.Add(this.labelCurrentBoxId);
             this.panel3.Controls.Add(this.label3);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -183,6 +189,18 @@
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(480, 92);
             this.panel3.TabIndex = 12;
+            // 
+            // buttonDebug
+            // 
+            this.buttonDebug.Location = new System.Drawing.Point(45, 45);
+            this.buttonDebug.Margin = new System.Windows.Forms.Padding(1);
+            this.buttonDebug.Name = "buttonDebug";
+            this.buttonDebug.Size = new System.Drawing.Size(104, 34);
+            this.buttonDebug.TabIndex = 15;
+            this.buttonDebug.Text = "Debug";
+            this.buttonDebug.UseVisualStyleBackColor = true;
+            this.buttonDebug.Visible = false;
+            this.buttonDebug.Click += new System.EventHandler(this.buttonDebug_Click);
             // 
             // labelCurrentBoxId
             // 
@@ -313,6 +331,7 @@
             this.button1.TabIndex = 14;
             this.button1.Text = "Opcje";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // dgvCurrentBox
@@ -328,7 +347,7 @@
             this.PCB,
             this.TestResult,
             this.ViResult,
-            this.Column4});
+            this.ColumnDelete});
             this.dgvCurrentBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCurrentBox.Location = new System.Drawing.Point(3, 103);
             this.dgvCurrentBox.Name = "dgvCurrentBox";
@@ -336,6 +355,7 @@
             this.dgvCurrentBox.RowHeadersVisible = false;
             this.dgvCurrentBox.Size = new System.Drawing.Size(1124, 502);
             this.dgvCurrentBox.TabIndex = 1;
+            this.dgvCurrentBox.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCurrentBox_CellClick);
             this.dgvCurrentBox.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCurrentBox_CellContentClick);
             this.dgvCurrentBox.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCurrentBox_CellValueChanged);
             // 
@@ -372,12 +392,12 @@
             this.ViResult.Name = "ViResult";
             this.ViResult.ReadOnly = true;
             // 
-            // Column4
+            // ColumnDelete
             // 
-            this.Column4.HeaderText = "Usuń";
-            this.Column4.Name = "Column4";
-            this.Column4.ReadOnly = true;
-            this.Column4.Width = 35;
+            this.ColumnDelete.HeaderText = "Usuń";
+            this.ColumnDelete.Name = "ColumnDelete";
+            this.ColumnDelete.ReadOnly = true;
+            this.ColumnDelete.Width = 35;
             // 
             // timerCheckDgvForTestResults
             // 
@@ -391,18 +411,40 @@
             // 
             // timerTestResultsToGrid
             // 
-            this.timerTestResultsToGrid.Enabled = true;
             this.timerTestResultsToGrid.Interval = 500;
             this.timerTestResultsToGrid.Tick += new System.EventHandler(this.timerTestResultsToGrid_Tick);
             // 
             // timerFlashNg
             // 
             this.timerFlashNg.Interval = 500;
+            this.timerFlashNg.Tick += new System.EventHandler(this.timerFlashNg_Tick);
             // 
             // timerBlinkThePanel
             // 
             this.timerBlinkThePanel.Interval = 300;
             this.timerBlinkThePanel.Tick += new System.EventHandler(this.timerBlinkThePanel_Tick);
+            // 
+            // panelMixed12NcWarning
+            // 
+            this.panelMixed12NcWarning.BackColor = System.Drawing.Color.Orange;
+            this.panelMixed12NcWarning.Controls.Add(this.label);
+            this.panelMixed12NcWarning.ForeColor = System.Drawing.Color.White;
+            this.panelMixed12NcWarning.Location = new System.Drawing.Point(368, 6);
+            this.panelMixed12NcWarning.Margin = new System.Windows.Forms.Padding(1);
+            this.panelMixed12NcWarning.Name = "panelMixed12NcWarning";
+            this.panelMixed12NcWarning.Size = new System.Drawing.Size(169, 56);
+            this.panelMixed12NcWarning.TabIndex = 16;
+            this.panelMixed12NcWarning.Visible = false;
+            // 
+            // label
+            // 
+            this.label.AutoSize = true;
+            this.label.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label.Location = new System.Drawing.Point(3, 3);
+            this.label.Name = "label";
+            this.label.Size = new System.Drawing.Size(279, 29);
+            this.label.TabIndex = 12;
+            this.label.Text = "Pomylone numery 12NC:";
             // 
             // Form1
             // 
@@ -423,6 +465,8 @@
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCurrentBox)).EndInit();
+            this.panelMixed12NcWarning.ResumeLayout(false);
+            this.panelMixed12NcWarning.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -453,15 +497,18 @@
         private System.Windows.Forms.Label labelAllQty;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Timer timerFlashNg;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Timer timerBlinkThePanel;
+        private System.Windows.Forms.Button buttonDebug;
         private System.Windows.Forms.DataGridViewTextBoxColumn rowIndex;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn PCB;
         private System.Windows.Forms.DataGridViewTextBoxColumn TestResult;
         private System.Windows.Forms.DataGridViewTextBoxColumn ViResult;
-        private System.Windows.Forms.DataGridViewButtonColumn Column4;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Timer timerBlinkThePanel;
+        private System.Windows.Forms.DataGridViewButtonColumn ColumnDelete;
+        private System.Windows.Forms.Panel panelMixed12NcWarning;
+        private System.Windows.Forms.Label label;
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pakowanie_LED_MST.Data_structure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,32 +10,22 @@ namespace Pakowanie_LED_MST
     {
         private string _serial;
 
-        public LedsInCurrentBoxStruct(DateTime date, string serial, string orderNo, string testResult, string viResult, bool addMeToGrid=true)
+        public LedsInCurrentBoxStruct(DateTime date, string testResult, DateTime testDate, string viResult, ReworkInfo reworkNfo, bool updateMe)
         {
             Date = date;
-            Serial = serial;
-            OrderNo = orderNo;
             TestResult = testResult;
+            TestDate = testDate;
             ViResult = viResult;
-            AddMeToGrid = addMeToGrid;
+            ReworkNfo = reworkNfo;
+            UpdateMe = updateMe;
         }
 
         public DateTime Date { get; }
-        public string Serial
-        {
-            get
-            {
-                return _serial;
-            }
-            set
-            {
-                _serial = value;
-
-            }
-        }
         public string OrderNo { get; set; }
         public string TestResult { get; set; }
+        public DateTime TestDate { get; set; }
         public string ViResult { get; set; }
-        public bool AddMeToGrid { get; set; }
+        public ReworkInfo ReworkNfo { get; }
+        public bool UpdateMe { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -34,7 +35,17 @@ namespace Pakowanie_LED_MST
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
             this.Text +=" ver."+ version;
-            
+
+            panelMixed12NcWarning.Parent = this;
+            panelMixed12NcWarning.BringToFront();
+            panelMixed12NcWarning.Location = new Point(0, 0);
+            panelMixed12NcWarning.Size = new Size(this.Width, buttonNewBox.Height + 5);
+
+
+#if DEBUG
+            buttonDebug.Visible = true;
+#endif
+
         }
 
         private void textBoxAddPcb_Enter(object sender, EventArgs e)
@@ -51,29 +62,57 @@ namespace Pakowanie_LED_MST
             tb.ForeColor = Color.Black;
         }
 
-
         private void buttonNewBox_Click(object sender, EventArgs e)
         {
             using (NewBox newBoxForm = new NewBox())
             {
-                newBoxForm.ShowDialog();
-                if (newBoxForm.boxId.Trim() != "")
+                if (newBoxForm.ShowDialog() == DialogResult.OK)
                 {
-                    CreateNewBox(newBoxForm.boxId, FilesOperations.CheckIfBoxExist(newBoxForm.boxId));
-                    labelCurrentBoxId.Text = "Aktualne opakowanie ID: " + Environment.NewLine + newBoxForm.boxId;
+                    if (newBoxForm.boxId.Trim() != "")
+                    {
+                        CreateNewBox(newBoxForm.boxId);
+                        labelCurrentBoxId.Text = "Aktualne opakowanie ID: " + Environment.NewLine + newBoxForm.boxId;
+                        CountPanels();
+                    }
                 }
             }
         }
 
-        private void CreateNewBox(string boxId, bool loadExistingPcb)
+        private void CreateNewBox(string boxId)
         {
             dgvCurrentBox.Rows.Clear();
-            currentBox = new CurrentBox(boxId, "", "", new Dictionary<string, LedsInCurrentBoxStruct>(),false, 0,0,0,0);
-            if (loadExistingPcb)
+            currentBox = new CurrentBox(boxId, "", new Dictionary<string, LedsInCurrentBoxStruct>(),false, 0,0,0,0,"");
+            DataTable boxTable = SqlOperations.GetPcbsForBoxId(boxId);
+            Dictionary<string, DateTime> serialDateDict = new Dictionary<string, DateTime>();
+            if (boxTable.Rows.Count > 0)
             {
-                currentBox.LedsInBox = FilesOperations.LoadBoxFromFile(boxId);
-                currentBox.NewResultsAdded = true;
+                foreach (DataRow row in boxTable.Rows)
+                {
+                    DateTime date = DateTime.Parse(row["Boxing_Date"].ToString());
+                    serialDateDict.Add(row["serial_no"].ToString(), date);
+                }
+
+                CurrentBoxOperation.AddPcbToBox(serialDateDict, ref currentBox, dgvCurrentBox);
+                CheckMixed12NC();
                 DgvTools.AutoColumnSize(dgvCurrentBox, DataGridViewAutoSizeColumnMode.AllCells);
+            }
+        }
+
+        private void CheckMixed12NC()
+        {
+            if (currentBox.FirstModule12Nc != "")
+            {
+                string[] nc12InBox = DgvTools.CheckMixed12NC(dgvCurrentBox);
+                if (nc12InBox.Length > 1)
+                {
+                    panelMixed12NcWarning.Visible = true;
+                    label.Text = "Pomylone 12NC. W kartonie znajdują się następujące 12NC wyrobów: "+Environment.NewLine;
+                    label.Text += string.Join(" - ", nc12InBox);
+                }
+                else
+                {
+                    panelMixed12NcWarning.Visible = false;
+                }
             }
         }
 
@@ -87,14 +126,31 @@ namespace Pakowanie_LED_MST
             if (e.KeyCode == Keys.Return)
             {
                 string serial = ShortenPcbSerial(textBoxAddPcb.Text.Trim());
-
+                if (serial!="")
                 if (!currentBox.LedsInBox.ContainsKey(serial))
                 {
-                    CurrentBoxOperation.AddPcbToBox(serial, ref currentBox);
-                    FilesOperations.SaveBoxFile(currentBox);
-                    DgvTools.AutoColumnSize(dgvCurrentBox, DataGridViewAutoSizeColumnMode.AllCells);
-                    lastRowColor = dgvCurrentBox.Rows[0].Cells[0].Style.BackColor;
-                    timerBlinkThePanel.Enabled = true;
+                    string itsAlreadyInBox = SqlOperations.GetBoxIdForPcb(serial);
+                    if (itsAlreadyInBox == "")
+                    {
+                            if (SqlOperations.InsertNewPcbToBoxSqlTable(serial, currentBox.BoxId, DateTime.Now))
+                            {
+                                Dictionary<string, DateTime> onePcbDict = new Dictionary<string, DateTime>();
+                                onePcbDict.Add(serial, DateTime.Now);
+
+                                CurrentBoxOperation.AddPcbToBox(onePcbDict, ref currentBox, dgvCurrentBox);
+                                CheckMixed12NC();
+                                DgvTools.AutoColumnSize(dgvCurrentBox, DataGridViewAutoSizeColumnMode.AllCells);
+                                if (dgvCurrentBox.Rows.Count > 0)
+                                {
+                                    lastRowColor = dgvCurrentBox.Rows[0].Cells[0].Style.BackColor;
+                                    timerBlinkThePanel.Enabled = true;
+                                }
+                            }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ten numer PCB został już dodany do kartonu: " + itsAlreadyInBox);
+                    }
                 }
                 else
                 {
@@ -166,6 +222,7 @@ namespace Pakowanie_LED_MST
             labelGoodQty.Text = okPcb.ToString();
             labelNgCount.Text = ngPcb.ToString();
             labelUnknownCount.Text = unknownPcb.ToString();
+
             if (labelNgCount.Text != "0")
             {
                 timerFlashNg.Enabled = true;
@@ -173,38 +230,22 @@ namespace Pakowanie_LED_MST
             else
             {
                 timerFlashNg.Enabled = false;
+                panel2.BackColor = Color.LightSteelBlue;
             }
         }
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            TestResults.CheckResultsForBox(ref currentBox, optionCheckTest, optionCheckVi);
+            if (TestResults.CheckResultsForBox(ref currentBox, optionCheckTest, optionCheckVi))
+            {
+                DgvTools.UpdateTestsToGrid(dgvCurrentBox,ref currentBox);
+                CountPanels();
+            }
         }
 
         private void timerTestResultsToGrid_Tick(object sender, EventArgs e)
         {
-            if (currentBox != null)
-            {
-                if (currentBox.NewResultsAdded)
-                {
-                    DgvTools.CheckTests(dgvCurrentBox, ref currentBox);
-                }
-                CountPanels();
-            }
-            if (backgroundWorker1.IsBusy)
-            {
-                foreach (DataGridViewRow row in dgvCurrentBox.Rows)
-                {
-                    if (row.Cells["TestResult"].Value.ToString()=="BrakDanych")
-                    {
-                        row.Cells["TestResult"].Value = "Sprawdzam...";
-                    }
-                    if (row.Cells["ViResult"].Value.ToString() == "BrakDanych")
-                    {
-                        row.Cells["ViResult"].Value = "Sprawdzam...";
-                    }
-                }
-            }
+
         }
 
         private void textBoxAddPcb_Leave_1(object sender, EventArgs e)
@@ -226,7 +267,9 @@ namespace Pakowanie_LED_MST
                 if (senderGrid.Rows[e.RowIndex].Cells["PCB"].Value!=null)
                 {
                     string serial = senderGrid.Rows[e.RowIndex].Cells["PCB"].Value.ToString();
-                    DgvTools.DeletePcb(serial, ref currentBox, senderGrid);
+                    DgvTools.DeletePcb(serial, ref currentBox, senderGrid, e.RowIndex);
+                    CountPanels();
+                    CheckMixed12NC();
                 }
             }
         }
@@ -235,10 +278,24 @@ namespace Pakowanie_LED_MST
         {
             using (NewBox newBoxForm = new NewBox())
             {
+                bool found = false;
                 newBoxForm.ShowDialog();
                 if (newBoxForm.boxId.Trim() != "")
                 {
-                    DgvTools.DeletePcb(newBoxForm.boxId,ref currentBox, dgvCurrentBox);
+                    for (int r=0; r<dgvCurrentBox.Rows.Count;r++)
+                    {
+                        if (dgvCurrentBox.Rows[r].Cells["PCB"].Value.ToString() == newBoxForm.boxId)
+                        {
+                            DgvTools.DeletePcb(newBoxForm.boxId, ref currentBox, dgvCurrentBox, r);
+                            CheckMixed12NC();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        MessageBox.Show("Tego kodu nie ma w kartonie.");
+                    }
                 }
             }
         }
@@ -268,6 +325,33 @@ namespace Pakowanie_LED_MST
             
         }
 
-        
+        private void buttonDebug_Click(object sender, EventArgs e)
+        {
+            SqlOperations.CheckViResultsNgTrackingTable(new string[] { "1010 117 327_1694831_258", "virtual" });
+        }
+
+        private void dgvCurrentBox_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 & e.ColumnIndex == 2)
+            {
+                string serial = dgvCurrentBox.Rows[e.RowIndex].Cells[2].Value.ToString();
+                using (ShowPcbDetails detailsForm = new ShowPcbDetails(currentBox.LedsInBox[serial]))
+                {
+                    detailsForm.ShowDialog();
+                }
+            }
+        }
+
+        private void timerFlashNg_Tick(object sender, EventArgs e)
+        {
+            if (panel2.BackColor == Color.LightSteelBlue )
+            {
+                panel2.BackColor = Color.Red;
+            }
+            else
+            {
+                panel2.BackColor = Color.LightSteelBlue;
+            }
+        }
     }
 }

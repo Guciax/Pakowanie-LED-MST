@@ -14,91 +14,72 @@ namespace Pakowanie_LED_MST
             public string viTesult;
         }
 
-        public static void CheckResultsForBox(ref CurrentBox currentBox, bool checkTest, bool checkVi)
+        public static bool CheckResultsForBox(ref CurrentBox currentBox, bool checkTest, bool checkVi)
         {
+            bool newResultsFound = false;
             if (currentBox != null)
             {
                 List<string> pcbWithoutTest = new List<string>();
                 List<string> pcbWithoutVi = new List<string>();
 
-                foreach (var pcb in currentBox.LedsInBox)
+                foreach (var pcbEntry in currentBox.LedsInBox)
                 {
-                    if (pcb.Value.TestResult == "BrakDanych" || pcb.Value.TestResult == "NG")
+                    if (pcbEntry.Value.TestResult != "OK")
                     {
                         if (checkTest)
                         {
-                            pcbWithoutTest.Add(pcb.Value.Serial);
+                            pcbWithoutTest.Add(pcbEntry.Key);
                         }
                     }
 
-                    if ( pcb.Value.ViResult == "BrakDanych" || pcb.Value.ViResult == "NG")
+                    if ( pcbEntry.Value.ViResult != "OK")
                     {
                         if (checkVi)
                         {
-                            pcbWithoutVi.Add(pcb.Value.Serial);
+                            pcbWithoutVi.Add(pcbEntry.Key);
                         }
                     }
-
                 }
 
-                if (pcbWithoutTest.Count > 0)
+                if (pcbWithoutTest.Count > 0) 
                 {
-                    Dictionary<string, string> testResult = CheckTestResult(pcbWithoutTest.ToArray());
+                    Dictionary<string, SqlOperations.TestResultStructure> testTes = SqlOperations.CheckTestResultsForPcbsMeasurementsCount_View(pcbWithoutTest.ToArray());
                     foreach (var pcb in pcbWithoutTest)
                     {
-                        string result = "";
-                        if(!testResult.TryGetValue(pcb,out result))
+                        if (!testTes.ContainsKey(pcb)) continue;
+                        if(currentBox.LedsInBox[pcb].TestResult != testTes[pcb].result)
                         {
-                            result = "BrakDanych";
+                            currentBox.LedsInBox[pcb].TestResult = testTes[pcb].result;
+                            currentBox.LedsInBox[pcb].TestDate = testTes[pcb].testDate;
+                            currentBox.LedsInBox[pcb].UpdateMe = true;
+                            newResultsFound=true;
                         }
-                        currentBox.LedsInBox[pcb].TestResult = result;
-                    }
-                    if (pcbWithoutTest.Count > 0)
-                    {
-                        currentBox.NewResultsAdded = true;
                     }
                 }
 
                 if (pcbWithoutVi.Count > 0)
                 {
-                    Dictionary<string, string> testResult = CheckViResult(pcbWithoutVi.ToArray());
+                    Dictionary<string, SqlOperations.ViResultStructure> viRes = SqlOperations.CheckViResultsNgTrackingTable(pcbWithoutVi.ToArray());
                     foreach (var pcb in pcbWithoutVi)
                     {
-                        string result = "";
-                        if (!testResult.TryGetValue(pcb, out result))
+                        if (!viRes.ContainsKey(pcb)) continue;
+                        string checkCurBox = currentBox.LedsInBox[pcb].ViResult = viRes[pcb].result + currentBox.LedsInBox[pcb].ReworkNfo.ReworkResult + currentBox.LedsInBox[pcb].ReworkNfo.ReworkDate + currentBox.LedsInBox[pcb].ReworkNfo.PostReworkViResult + currentBox.LedsInBox[pcb].ReworkNfo.OqaResult;
+                        string checkUpdated = viRes[pcb].result+viRes[pcb].reworkResult+ viRes[pcb].rewokDate+ viRes[pcb].postReworkViResult+ viRes[pcb].OqaResult;
+                        if (checkCurBox != checkUpdated)
                         {
-                            result = "BrakDanych";
+                            currentBox.LedsInBox[pcb].ViResult = viRes[pcb].result;
+                            currentBox.LedsInBox[pcb].ReworkNfo.ReworkResult = viRes[pcb].reworkResult;
+                            currentBox.LedsInBox[pcb].ReworkNfo.ReworkDate = viRes[pcb].rewokDate;
+                            currentBox.LedsInBox[pcb].ReworkNfo.PostReworkViResult = viRes[pcb].postReworkViResult;
+                            currentBox.LedsInBox[pcb].ReworkNfo.OqaResult = viRes[pcb].OqaResult;
+                            currentBox.LedsInBox[pcb].UpdateMe = true;
+                            newResultsFound = true;
                         }
-                        currentBox.LedsInBox[pcb].ViResult = result;
-                    }
-                    if (pcbWithoutTest.Count > 0)
-                    {
-                        currentBox.NewResultsAdded = true;
                     }
                 }
             }
+            return newResultsFound;
         }
 
-        public static Dictionary<string,string> CheckViResult(string[] serialNo)
-        {
-            Dictionary<string, string> result = SqlOperations.CheckViResultsForPcbs(serialNo);
-
-
-
-            foreach (var pcb in serialNo)
-            {
-                if (result.ContainsKey(pcb)) continue;
-                result.Add(pcb, "OK");
-            }
-
-            return result;
-        }
-
-        public static Dictionary<string, string> CheckTestResult(string[] serialNo)
-        {
-            Dictionary<string, string> result = SqlOperations.CheckTestResultsForPcbs(serialNo);
-            
-            return result;
-        }
     }
 }

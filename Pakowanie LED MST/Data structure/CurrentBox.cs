@@ -9,10 +9,9 @@ namespace Pakowanie_LED_MST.Data_structure
 {
     public class CurrentBox
     {
-        public CurrentBox(string boxId, string modelId, string modelName, Dictionary<string, LedsInCurrentBoxStruct> ledsInBox, bool newResultsAdded, int totalQty, int ngQty, int unknownTestQty, int goodQty)
+        public CurrentBox(string boxId, string modelName, Dictionary<string, LedsInCurrentBoxStruct> ledsInBox, bool newResultsAdded, int totalQty, int ngQty, int unknownTestQty, int goodQty, string firstModule12Nc)
         {
             BoxId = boxId;
-            ModelId = modelId;
             ModelName = modelName;
             LedsInBox = ledsInBox;
             NewResultsAdded = newResultsAdded;
@@ -20,7 +19,7 @@ namespace Pakowanie_LED_MST.Data_structure
             NgQty = ngQty;
             UnknownTestQty = unknownTestQty;
             GoodQty = goodQty;
-            
+            FirstModule12Nc = firstModule12Nc;
         }
 
         public string BoxId { get; set; }
@@ -79,5 +78,6 @@ namespace Pakowanie_LED_MST.Data_structure
             {}
         }
 
+        public string FirstModule12Nc { get; set; }
     }
 }
